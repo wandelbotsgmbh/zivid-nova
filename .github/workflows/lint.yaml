@@ -1,0 +1,54 @@
+---
+name: Lint
+
+on:  # yamllint disable-line rule:truthy
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install Zivid SDK
+        run: |
+          wget --progress=dot:giga \
+            https://downloads.zivid.com/sdk/releases/2.13.1+18e79e79-1/u22/amd64/zivid_2.13.1+18e79e79-1_amd64.deb
+          sudo dpkg -i zivid_2.13.1+18e79e79-1_amd64.deb
+
+      - name: Install Python linting tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          poetry install
+
+      - name: Format
+        run: |
+          poetry run black zivid_nova tests --check
+
+      - name: Sort
+        run: |
+          poetry run isort zivid_nova --check-only --diff
+
+      - name: Pylint
+        run: |
+          poetry run pylint zivid_nova
+      
+      - name: Mypy
+        run: |
+          poetry run mypy
+
+      - name: Test
+        run: |
+          poetry run pytest tests -s
