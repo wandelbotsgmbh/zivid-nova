@@ -1,0 +1,73 @@
+__version__:
+    serializer: 1
+    data: 17
+Settings:
+    Acquisitions:
+        - Acquisition:
+              Aperture: 2.38
+              Brightness: 1.8
+              ExposureTime: 10000
+              Gain: 1
+        - Acquisition:
+              Aperture: 4
+              Brightness: 1.8
+              ExposureTime: 1677
+              Gain: 1
+    Diagnostics:
+        Enabled: no
+    Experimental:
+        Engine: stripe
+    Processing:
+        Color:
+            Balance:
+                Blue: 1
+                Green: 1
+                Red: 1
+            Experimental:
+                Mode: automatic
+            Gamma: 0.8
+        Filters:
+            Cluster:
+                Removal:
+                    Enabled: yes
+                    MaxNeighborDistance: 5
+                    MinArea: 200
+            Experimental:
+                ContrastDistortion:
+                    Correction:
+                        Enabled: yes
+                        Strength: 0.3
+                    Removal:
+                        Enabled: no
+                        Threshold: 0.3
+                HoleFilling:
+                    Enabled: __not_set__
+                    HoleSize: __not_set__
+                    Strictness: __not_set__
+            Noise:
+                Removal:
+                    Enabled: yes
+                    Threshold: 3
+            Outlier:
+                Removal:
+                    Enabled: yes
+                    Threshold: 10
+            Reflection:
+                Removal:
+                    Enabled: yes
+                    Experimental:
+                        Mode: global
+            Smoothing:
+                Gaussian:
+                    Enabled: yes
+                    Sigma: 1.75
+    RegionOfInterest:
+        Box:
+            Enabled: __not_set__
+            Extents: __not_set__
+            PointA: __not_set__
+            PointB: __not_set__
+            PointO: __not_set__
+        Depth:
+            Enabled: no
+            Range: [300, 1300]

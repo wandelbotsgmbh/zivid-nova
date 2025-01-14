@@ -1,4 +1,4 @@
-# zivid-nova
+# zivid @nova
 
 Zivid integration for Wandelbots Nova
 
@@ -45,3 +45,7 @@ $ skaffold run
 
 * `poetry run black zivid_nova`
 * `poetry run isort zivid_nova tests`
+
+## further reading
+
+For more in depth device integration information you can have a look in the [docs for the initial integration](docs/oldreadme.md)
