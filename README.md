@@ -1,10 +1,19 @@
-# zivid-nova
+# Zivid-Nova
 
-[Zivid](https://www.zivid.com/de/) integration for Wandelbots Nova
+[Zivid](https://www.zivid.com/de/) integration for Wandelbots Nova.
 
-## install
+This app allows to access Zivid SDK functionalties via [OpenAPI Interface](openapi.json).
 
-* requirement: [nova cli](https://github.com/wandelbotsgmbh/wabocli)
+## Prerequisite
+
+* You need a setup with a physical Zivid camera connected to your IPC.
+* The Ethernet interface needs to be in the IP range to access the camera under its default IP address `172.28.60.5/24`.
+* The IPC must be equipped with an Intel GPU (integrated graphics of the CPU will also work).
+    * The support for other GPUs is in progress.
+
+## Install
+
+* Requirement: [nova cli](https://github.com/wandelbotsgmbh/wabocli)
 
 ```bash
 # Currently only machines with intel gpu (integrated gpu will also work) are supported with Nova.
@@ -12,21 +21,21 @@
 $ nova catalog install zivid-intel
 ```
 
-## api
+## API
 
 The first draft of the spec can be seen here [openapi.json](openapi.json).
 
-## development
+## Development
 
-### formatting
+### Formatting
 
 * `poetry run black zivid_nova`
 * `poetry run isort zivid_nova tests`
 
-### running locally
+### Running Locally
 
-* make sure [Zivid SDK](https://support.zivid.com/en/latest/index.html) is installed on your machine 
-* install project dependencies `poetry install`
-* run the project with `poetry run serve`
-    * if your are using vscode you can press F5
-* visit `127.0.0.1:8080` to access the [api docs](openapi.json)
+* Make sure [Zivid SDK](https://support.zivid.com/en/latest/index.html) is installed on your machine.
+* Install project dependencies `poetry install`.
+* Run the project with `poetry run serve`.
+    * If you are using vscode you can press F5.
+* Visit `127.0.0.1:8080` to access the [api docs](openapi.json).
