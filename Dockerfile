@@ -1,4 +1,4 @@
-FROM container-registry.wabo.run/docker-hub/library/python:3.11 AS builder
+FROM python:3.11 AS builder
 
 # install all zivid SDK and all required dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -17,9 +17,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-get clean &&\
     rm -rf /var/lib/apt/lists/*
 
-ARG POETRY_HTTP_BASIC_NEXUS_USERNAME=""
-ARG POETRY_HTTP_BASIC_NEXUS_PASSWORD=""
-
 RUN pip install --upgrade pip \
     && pip install poetry==1.8.2
 
@@ -36,7 +33,7 @@ COPY zivid_nova/ ./zivid_nova/
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --no-dev # install dependencies
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR  poetry run pip install .  # zivid_nova package
 
-FROM container-registry.wabo.run/docker-hub/library/python:3.11-slim AS runtime
+FROM python:3.11-slim AS runtime
 
 ENV VIRTUAL_ENV=/zivid-nova/.venv PATH="/zivid-nova/.venv/bin:$PATH"
 

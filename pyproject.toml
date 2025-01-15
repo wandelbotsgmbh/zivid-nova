@@ -5,6 +5,7 @@ description = "Nova plugin for Zivid 3D cameras."
 authors = [
     "Patrick Schmager <patrick.schmager@wandelbots.com>",
     "André Kühnert <andre.kuehnert@wandelbots.com>",
+    "Leonard Hansing <leonard.hansing@wandelbots.com",
 ]
 include = [
     "zivid_nova"
