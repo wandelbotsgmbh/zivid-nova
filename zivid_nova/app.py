@@ -3,7 +3,7 @@ import zivid.application
 from decouple import config
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse
 
 from zivid_nova import routes
 
@@ -38,10 +38,31 @@ app.include_router(routes.calibrations.router)
 app.include_router(routes.cameras.router)
 
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 async def root():
-    # One could serve a nice UI here as well. For simplicity, we just redirect to the swagger docs page.
-    return RedirectResponse(url=BASE_PATH + "/docs")
+    # One could serve a nice UI here as well. For simplicity and discoverability, we show the Stoplight UI
+    return f"""
+    <!doctype html>
+        <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+            <title>Elements in HTML</title>
+            <!-- Embed elements Elements via Web Component -->
+            <script src="https://unpkg.com/@stoplight/elements/web-components.min.js"></script>
+            <link rel="stylesheet" href="https://unpkg.com/@stoplight/elements/styles.min.css">
+          </head>
+          <body>
+
+            <elements-api
+              apiDescriptionUrl="{BASE_PATH}/openapi.json"
+              router="hash"
+              layout="sidebar"
+            />
+
+          </body>
+    </html>
+    """
 
 
 @app.get("/version")
