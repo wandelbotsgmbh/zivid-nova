@@ -24,14 +24,14 @@ router = APIRouter(prefix="/cameras", tags=["cameras"])
 async def get_cameras() -> list[Camera]:
     """Get all cameras"""
 
-    return [Camera.from_zivid_camera(x) for x in zivid_app.app.cameras()]
+    return [Camera.from_zivid_camera(x) for x in zivid_app.get_cameras()]
 
 
 @router.get("/{serial_number}")
 async def get_camera(serial_number: str) -> Camera:
     """Get a camera by serial number"""
 
-    return Camera.from_zivid_camera(zivid_app.find_camera(serial_number))
+    return Camera.from_zivid_camera(zivid_app.get_connected_camera(serial_number))
 
 
 @router.get("/{serial_number}/frame", responses={200: {"content": {"application/octet-stream": {}}}})
@@ -42,7 +42,7 @@ async def get_camera_frame(
 ) -> FileResponse:
     """Get a frame from a camera in zdf format"""
 
-    camera = zivid_app.find_camera(serial_number)
+    camera = zivid_app.get_connected_camera(serial_number)
 
     with zivid_app.get_camera_frame(camera, down_sample_factor, preset) as frame:
         filename = f"{camera.info.serial_number}.zdf"
@@ -62,7 +62,7 @@ async def get_camera_frame_pointcloud(
     Any points with NaN (position) values will be removed.
     """
 
-    camera = zivid_app.find_camera(serial_number)
+    camera = zivid_app.get_connected_camera(serial_number)
 
     with zivid_app.get_camera_frame(camera, down_sample_factor, preset) as frame:
         filename = f"{camera.info.serial_number}.ply"
@@ -96,7 +96,7 @@ async def get_camera_frame_color_image(
 ) -> Response:
     """Get a color image from a camera"""
 
-    camera = zivid_app.find_camera(serial_number)
+    camera = zivid_app.get_connected_camera(serial_number)
 
     with zivid_app.get_camera_frame(camera, down_sample_factor, preset) as frame:
         point_cloud = frame.point_cloud()
@@ -116,7 +116,7 @@ async def get_camera_frame_depth_image(
 ) -> Response:
     """Get a depth image from a camera"""
 
-    camera = zivid_app.find_camera(serial_number)
+    camera = zivid_app.get_connected_camera(serial_number)
 
     with zivid_app.get_camera_frame(camera, down_sample_factor, preset) as frame:
         point_cloud = frame.point_cloud()
@@ -133,8 +133,8 @@ async def get_camera_frame_depth_image(
 async def get_camera_frame_board_pose(serial_number: str) -> Pose:
     """Get the pose of the calibration board in the camera frame"""
 
-    camera = zivid_app.find_camera(serial_number)
-    result = zivid_app.get_calibration_board(camera)
+    camera = zivid_app.get_connected_camera(serial_number)
+    result = zivid.calibration.detect_calibration_board(camera)
     if not result.valid():
         # failed precondition
         raise HTTPException(status_code=412, detail="Calibration board not detected")
@@ -146,7 +146,7 @@ async def get_camera_frame_board_pose(serial_number: str) -> Pose:
 async def get_camera_frame2d_color(serial_number: str) -> Response:
     """Get a color image from a camera"""
 
-    camera = zivid_app.find_camera(serial_number)
+    camera = zivid_app.get_connected_camera(serial_number)
 
     with zivid_app.get_camera_frame2d(camera) as frame:
         buffer = BytesIO()
@@ -160,7 +160,7 @@ async def get_camera_frame2d_color(serial_number: str) -> Response:
 async def get_camera_firmware_up_to_date(serial_number: str) -> bool:
     """Check if the camera firmware is up to date"""
 
-    camera = zivid_app.find_camera(serial_number)
+    camera = zivid_app.get_connected_camera(serial_number)
     if camera.state.connected:
         camera.disconnect()
 
@@ -171,7 +171,7 @@ async def get_camera_firmware_up_to_date(serial_number: str) -> bool:
 async def update_camera_firmware(serial_number: str):
     """Update the camera firmware if necessary. Also performs downgrades."""
 
-    camera = zivid_app.find_camera(serial_number)
+    camera = zivid_app.get_connected_camera(serial_number)
     if camera.state.connected:
         camera.disconnect()
 

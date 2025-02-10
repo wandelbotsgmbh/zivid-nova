@@ -8,7 +8,7 @@ from loguru import logger
 from zivid_nova import zivid_app
 from zivid_nova.models.calibration import Calibration
 from zivid_nova.models.pose import Pose
-from zivid_nova.zivid_app import find_camera
+from zivid_nova.zivid_app import get_connected_camera
 
 router = APIRouter(prefix="/calibrations", tags=["calibrations"])
 
@@ -33,7 +33,7 @@ async def delete_calibrations():
 async def start_calibration(serial_number: str) -> Calibration:
     """Start a new calibration"""
 
-    camera = find_camera(serial_number)
+    camera = get_connected_camera(serial_number)
     calibration = Calibration(
         id=str(uuid.uuid4()),
         serial_number=camera.info.serial_number,
@@ -57,8 +57,8 @@ async def add_calibration_pose(calibration_id: str, pose: Pose) -> Calibration:
     """Add a calibration pose to a calibration"""
 
     calibration = calibrations[calibration_id]
-    camera = find_camera(calibration.serial_number)
-    result = zivid_app.get_calibration_board(camera)
+    camera = get_connected_camera(calibration.serial_number)
+    result = zivid.calibration.detect_calibration_board(camera)
 
     if not result.valid():
         logger.info("Calibration board not detected.")
