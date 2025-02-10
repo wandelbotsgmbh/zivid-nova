@@ -58,6 +58,7 @@ async def root():
               apiDescriptionUrl="{BASE_PATH}/openapi.json"
               router="hash"
               layout="sidebar"
+              tryItCredentialsPolicy="same-origin"
             />
 
           </body>
