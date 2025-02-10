@@ -24,8 +24,8 @@ jobs:
       - name: Install Zivid SDK
         run: |
           wget --progress=dot:giga \
-            https://downloads.zivid.com/sdk/releases/2.13.1+18e79e79-1/u22/amd64/zivid_2.13.1+18e79e79-1_amd64.deb
-          sudo dpkg -i zivid_2.13.1+18e79e79-1_amd64.deb
+            https://downloads.zivid.com/sdk/releases/2.14.1+b4e8f261-1/u22/amd64/zivid_2.14.1+b4e8f261-1_amd64.deb
+          sudo dpkg -i zivid_2.14.1+b4e8f261-1_amd64.deb
 
       - name: Install Python linting tools
         run: |
