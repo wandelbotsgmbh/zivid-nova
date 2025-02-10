@@ -39,3 +39,17 @@ The first draft of the spec can be seen here [openapi.json](openapi.json).
 * Run the project with `poetry run serve`.
     * If you are using vscode you can press F5.
 * Visit `127.0.0.1:8080` to access the [api docs](openapi.json).
+
+### Building & Pushing & Installing
+
+```bash
+$ nova app install
+```
+
+### Building Docker
+
+```bash
+$ docker buildx build --platform linux/amd64 -t registry.code.wabo.run/ai/zivid-nova/zivid-nova --push .
+```
+
+

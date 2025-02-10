@@ -1,0 +1,6 @@
+name: camera
+type: app
+port: 8080
+appIcon: app_icon.png
+resources:
+  intel-gpu: 1
