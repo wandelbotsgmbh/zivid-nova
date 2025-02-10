@@ -18,22 +18,25 @@ except RuntimeError:
 
 camera_cache: dict[str, zivid.Camera] = {}
 
+
 def _update_camera_cache():
     """Update the camera cache"""
-    global camera_cache
+    global camera_cache  # pylint: disable=global-statement
 
     # Keep connected camera references because new references are not connected
-    camera_cache = { kv[0]: kv[1] for kv in camera_cache.items() if kv[1].state.connected }
+    camera_cache = {kv[0]: kv[1] for kv in camera_cache.items() if kv[1].state.connected}
 
     for camera in app.cameras():
         if not camera.info.serial_number in camera_cache:
             camera_cache[camera.info.serial_number] = camera
+
 
 def get_cameras() -> list[zivid.Camera]:
     """Get a list of all cameras."""
 
     _update_camera_cache()
     return list(camera_cache.values())
+
 
 def get_connected_camera(serial_number: str) -> zivid.Camera:
     """Get a camera by serial number. Makes sure the camera is connected."""
@@ -43,19 +46,20 @@ def get_connected_camera(serial_number: str) -> zivid.Camera:
         _update_camera_cache()
         if not serial_number in camera_cache:
             raise ValueError(f"Camera with serial number {serial_number} not found")
-    
+
     camera = camera_cache[serial_number]
-    
+
     # Cameras can be disconnected during operation. Reconnect if needed.
     # If it fails remove it from the cache and raise an error
     try:
         if not camera.state.connected:
             camera.connect()
-    except:
+    except Exception as exc:
         camera_cache.pop(serial_number)
-        raise ValueError(f"Camera with serial number {serial_number} not found")
+        raise ValueError(f"Camera with serial number {serial_number} not found") from exc
 
     return camera
+
 
 def _get_settings(camera: zivid.Camera, preset: CaptureSettingsPreset) -> zivid.Settings:
     """Get settings for a camera and a preset. Loads settings from file or suggests settings if preset is AUTO"""

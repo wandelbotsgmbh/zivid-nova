@@ -5,7 +5,6 @@ import zivid.calibration
 from fastapi import APIRouter
 from loguru import logger
 
-from zivid_nova import zivid_app
 from zivid_nova.models.calibration import Calibration
 from zivid_nova.models.pose import Pose
 from zivid_nova.zivid_app import get_connected_camera
