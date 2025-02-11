@@ -38,8 +38,8 @@ def get_cameras() -> list[zivid.Camera]:
     return list(camera_cache.values())
 
 
-def get_connected_camera(serial_number: str) -> zivid.Camera:
-    """Get a camera by serial number. Makes sure the camera is connected."""
+def get_camera(serial_number: str) -> zivid.Camera:
+    """Get a camera by serial number. Does not check if the camera is connected."""
 
     # Check if camera is in cache. If not, update cache and try again
     if not serial_number in camera_cache:
@@ -47,7 +47,13 @@ def get_connected_camera(serial_number: str) -> zivid.Camera:
         if not serial_number in camera_cache:
             raise ValueError(f"Camera with serial number {serial_number} not found")
 
-    camera = camera_cache[serial_number]
+    return camera_cache[serial_number]
+
+
+def get_connected_camera(serial_number: str) -> zivid.Camera:
+    """Get a camera by serial number. Makes sure the camera is connected."""
+
+    camera = get_camera(serial_number)
 
     # Cameras can be disconnected during operation. Reconnect if needed.
     # If it fails remove it from the cache and raise an error
