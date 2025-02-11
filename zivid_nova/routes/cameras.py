@@ -160,7 +160,7 @@ async def get_camera_frame2d_color(serial_number: str) -> Response:
 async def get_camera_firmware_up_to_date(serial_number: str) -> bool:
     """Check if the camera firmware is up to date"""
 
-    camera = zivid_app.get_connected_camera(serial_number)
+    camera = zivid_app.get_camera(serial_number)
     if camera.state.connected:
         camera.disconnect()
 
@@ -171,7 +171,7 @@ async def get_camera_firmware_up_to_date(serial_number: str) -> bool:
 async def update_camera_firmware(serial_number: str):
     """Update the camera firmware if necessary. Also performs downgrades."""
 
-    camera = zivid_app.get_connected_camera(serial_number)
+    camera = zivid_app.get_camera(serial_number)
     if camera.state.connected:
         camera.disconnect()
 
