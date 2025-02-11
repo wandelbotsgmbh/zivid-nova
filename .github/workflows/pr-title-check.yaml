@@ -1,5 +1,5 @@
 ---
-name: 'Validate PR Title'
+name: Validate PR Title
 
 on:  # yamllint disable-line rule:truthy
   pull_request:
