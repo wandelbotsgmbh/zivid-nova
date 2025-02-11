@@ -1,0 +1,27 @@
+---
+name: Release
+
+on:  # yamllint disable-line rule:truthy
+  pull_request: 
+    branches:
+      - main
+
+env:
+  REGISTRY: wandelbots.azurecr.io
+  IMAGE_NAME: nova-apps/zivid-nova
+
+jobs:
+  update-catalog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update Catalog
+        #if: steps.release.outputs.version != ''
+        run: |
+          git clone git@github.com:wandelbotsgmbh/catalog.git
+          cd catalog
+          git co -b feature/update-zivid-nova-to-1.0.0
+          yq -i -I4 '.app.containerImage.image = "wandelbots.azurecr.io/nova-services/zivid-intel:1.0.0"' catalog/zivid-intel/manifest.yaml
+          yq -i -I4 '.version = "1.0.0"' catalog/zivid-intel/manifest.yaml
+          git add catalog/zivid-intel/manifest.yaml
+          git push origin feature/update-zivid-nova-to-1.0.0
+          gh pr create --title "Update Zivid to 1.0.0" --body "Update Zivid Nova to 1.0.0" --base main

@@ -52,7 +52,8 @@ jobs:
         if: steps.release.outputs.version != ''
         run: poetry version ${{ steps.release.outputs.version }}
 
-      - uses: EndBug/add-and-commit@v9
+      - name: Commit Pyproject Updates
+        uses: EndBug/add-and-commit@v9
         if: steps.release.outputs.version != ''
         with:
           message: "chore(version): bump"
