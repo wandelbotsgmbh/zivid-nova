@@ -9,7 +9,6 @@ on:  # yamllint disable-line rule:truthy
 env:
   REGISTRY: wandelbots.azurecr.io
   IMAGE_NAME: nova-apps/zivid-nova
-  CATALOG: wandelbotsgmbh/catalog
 
 jobs:
   update-catalog:
@@ -17,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: ${CATALOG}
+          repository: wandelbotsgmbh/catalog
 
       # yamllint disable rule:line-length
       - name: Set foobar to cool
@@ -34,7 +33,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
           git commit -m "Update Zivid to 1.0.0"
-          git remote set-url origin https://x-access-token:${secrets.CATALOG_TOKEN}@github.com/${CATALOG}.git
+          git remote set-url origin https://x-access-token:${secrets.CATALOG_TOKEN}@github.com/wandelbotsgmbh/catalog.git
           git push -u origin feature/update-zivid-nova-to-1.0.0
           gh auth login --with-token <<< "${{ secrets.CATALOG_TOKEN }}"
           gh pr create --fill
