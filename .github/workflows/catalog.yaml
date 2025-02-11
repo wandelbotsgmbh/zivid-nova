@@ -18,13 +18,17 @@ jobs:
         with:
           repository: wandelbotsgmbh/catalog
 
+      # yamllint disable rule:line-length
+      - name: Set foobar to cool
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq -i -I4 '.app.containerImage.image = "wandelbots.azurecr.io/nova-services/zivid-intel:1.0.0"' catalog/zivid-intel/manifest.yaml && yq -i -I4 '.version = "1.0.0"' catalog/zivid-intel/manifest.yaml
+
       - name: Update Catalog
         # if: steps.release.outputs.version != ''
         # yamllint disable rule:line-length
         run: |
-          git co -b feature/update-zivid-nova-to-1.0.0
-          yq -i -I4 '.app.containerImage.image = "wandelbots.azurecr.io/nova-services/zivid-intel:1.0.0"' catalog/zivid-intel/manifest.yaml
-          yq -i -I4 '.version = "1.0.0"' catalog/zivid-intel/manifest.yaml
+          git checkout -b feature/update-zivid-nova-to-1.0.0
           git add catalog/zivid-intel/manifest.yaml
           git push origin feature/update-zivid-nova-to-1.0.0
           gh pr create --title "Update Zivid to 1.0.0" --body "Update Zivid Nova to 1.0.0" --base main
