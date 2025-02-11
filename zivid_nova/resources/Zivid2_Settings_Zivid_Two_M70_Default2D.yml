@@ -1,3 +1,5 @@
+# yamllint disable rule:truthy
+# yamllint disable rule:document-start
 __version__:
   serializer: 1
   data: 5
