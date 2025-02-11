@@ -32,6 +32,14 @@ The first draft of the spec can be seen here [openapi.json](openapi.json).
 * `poetry run black zivid_nova`
 * `poetry run isort zivid_nova tests`
 
+### YAML linting
+
+[prebuild image](https://hub.docker.com/r/cytopia/yamllint) is used for [yamllint](https://github.com/adrienverge/yamllint)
+
+```bash
+docker run --rm -it -v $(pwd):/data cytopia/yamllint -d .yamllint .
+```
+
 ### Running Locally
 
 * Make sure [Zivid SDK](https://support.zivid.com/en/latest/index.html) is installed on your machine.

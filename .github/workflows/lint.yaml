@@ -20,7 +20,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
+
       - name: Install Zivid SDK
         run: |
           wget --progress=dot:giga \
@@ -44,7 +44,7 @@ jobs:
       - name: Pylint
         run: |
           poetry run pylint zivid_nova
-      
+
       - name: Mypy
         run: |
           poetry run mypy
