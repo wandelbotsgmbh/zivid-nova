@@ -28,6 +28,8 @@ jobs:
       - name: Update Catalog
         # if: steps.release.outputs.version != ''
         # yamllint disable rule:line-length
+        env:
+          GH_TOKEN: ${{ secrets.CATALOG_TOKEN }}
         run: |
           git checkout -b feature/update-zivid-nova-to-1.0.0
           git add catalog/zivid-intel/manifest.yaml
