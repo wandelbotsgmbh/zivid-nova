@@ -60,7 +60,7 @@ jobs:
           message: "chore(version): bump"
           default_author: github_actions
           add: pyproject.toml
-      
+
       - name: Update Catalog Entry
         if: steps.release.outputs.version != ''
         env:
@@ -73,12 +73,10 @@ jobs:
             -H "Accept: application/vnd.github.v3+json" \
             -H "Authorization: Bearer ${GH_TOKEN}" \
             https://api.github.com/repos/wandelbotsgmbh/catalog/dispatches \
-            -d "{\"event_type\": \"update-entry\", 
+            -d "{\"event_type\": \"update-entry\",
                  \"client_payload\": {
                    \"image\":\"${IMAGE}\",
                    \"version\":\"${VERSION}\",
                    \"entry\":\"${CATALOG_ENTRY_NAME}\"
                 }
               }"
-
-
