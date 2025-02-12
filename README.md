@@ -57,7 +57,5 @@ $ nova app install
 ### Building Docker
 
 ```bash
-$ docker buildx build --platform linux/amd64 -t registry.code.wabo.run/ai/zivid-nova/zivid-nova --push .
+$ docker buildx build --platform linux/amd64 -t wandelbots.azurecr.io/nova-services/zivid-intel --push .
 ```
-
-
