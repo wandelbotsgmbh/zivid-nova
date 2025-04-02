@@ -1,9 +1,10 @@
 
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from zivid_nova import zivid_app
 import zivid
 from loguru import logger
+import uuid
 
 # TODO https://support.zivid.com/en/latest/academy/camera/infield-correction/infield-correction-cli-tool.html
 router = APIRouter(prefix="/infield-correction", tags=["infield-correction"])
@@ -12,7 +13,8 @@ correction_states = {}
 
 class Infield_Correction_State:
 
-    def __init__(self, correction_id: str):
+    def __init__(self, serial_number: str, correction_id: str):
+        self.camera_id = serial_number
         self.correction_id = correction_id
         self.dataset = []
 
@@ -28,19 +30,15 @@ async def verify(serial_number: str):
     of the point cloud where the Zivid calibration board is placed.
     """
     camera = zivid_app.get_connected_camera(serial_number)
+
     detection_result = zivid.calibration.detect_calibration_board(camera)
-    if not detection_result.valid():
-        raise RuntimeError(
-            f"Calibration board not detected! Feedback: {detection_result.status_description()}"
-        )
+    verify_detection_result(detection_result)
 
     infield_input = zivid.experimental.calibration.InfieldCorrectionInput(detection_result)
-    if not infield_input.valid():
-        raise RuntimeError(
-            f"Capture not valid for infield verification! Feedback: {infield_input.status_description()}"
-        )
-    
+    verify_infield_input(infield_input)
+
     camera_verification = zivid.experimental.calibration.verify_camera(infield_input)
+
     logger.info(
         f"Estimated dimension trueness error at measured position: {camera_verification.local_dimension_trueness() * 100:.3f}%"
     )
@@ -62,18 +60,37 @@ async def start_correction(serial_number: str) -> str:
     """
     # todo debatable 
     correction_states.clear()
-    return "hello world"
+    camera = zivid_app.get_connected_camera(serial_number)
+    state = Infield_Correction_State(
+        serial_number=camera.serial_number(), correction_id=str(uuid.uuid4())
+    )
+    correction_states[state.correction_id] = state
+    return state.correction_id
 
 @router.post("/{correction_id}")
-async def add_correction_dataset(correction_id: str) -> str:
+async def add_correction_dataset(correction_id: str):
     """
+    Add a new dataset to the correction run.
     """
-    return "hello world"
+    state = get_correction_state(correction_id)
+    camera = zivid_app.get_connected_camera(state.serial_number)
+
+    detection_result = zivid.calibration.detect_calibration_board(camera)
+    verify_detection_result(detection_result)
+
+    infield_input = zivid.experimental.calibration.InfieldCorrectionInput(detection_result)
+    verify_infield_input(infield_input)
+
+    state.dataset.append(infield_input)
+    logger.info(f"Collected {len(state.dataset)} dataset for infield correction.")
 
 @router.put("/{correction_id}")
 async def write_correction_dataset(correction_id: str) -> str:
     """
+    Calculates the correction based on the current dataset for the run.
     """
+    state = get_correction_state(correction_id)
+    camera = zivid_app.get_connected_camera(state.serial_number)
     return "hello world"
 
 @router.delete("/{correction_id}")
@@ -81,3 +98,23 @@ async def delete_correction_dataset(correction_id: str) -> str:
     """
     """
     return "hello world"
+
+def get_correction_state(correction_id: str) -> Infield_Correction_State:
+    if correction_id in correction_states:
+        return correction_states[correction_id]
+    raise HTTPException(status_code=404, detail="Correction ID not found")
+
+def verify_infield_input(infield_input):
+    """
+    Verify if the infield input is valid for infield correction.
+    """
+    if not infield_input.valid():
+        raise HTTPException(status_code=404, detail=
+            f"Capture not valid for infield correction! Feedback: {infield_input.status_description()}"
+        )
+
+def verify_detection_result(detection_result):
+    if not detection_result.valid():
+        raise HTTPException(status_code=404, detail=
+            f"Calibration board not detected! Feedback: {detection_result.status_description()}"
+        )

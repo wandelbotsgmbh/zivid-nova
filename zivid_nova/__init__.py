@@ -18,7 +18,7 @@ _BANNER = r"""
 """
 
 
-def main(host: str = "0.0.0.0", port: int = 8080):
+def main(host: str = "0.0.0.0", port: int = 8081):
     log_level = os.getenv("LOG_LEVEL", "info")
     logger.info(_BANNER)
     logger.info("Starting Service...")
