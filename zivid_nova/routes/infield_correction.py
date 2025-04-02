@@ -57,7 +57,8 @@ async def reset(serial_number: str):
     Using reset will remove any infield correction that has been applied in previous correct instances.
     It is not required to do a reset before doing a new infield correction.
     """
-    pass
+    camera = zivid_app.get_connected_camera(serial_number)
+    zivid.experimental.calibration.reset_camera_correction(camera)
 
 
 @router.post("")
@@ -94,7 +95,7 @@ async def add_correction_dataset(correction_id: str):
 @router.put("/{correction_id}")
 async def write_correction_dataset(correction_id: str):
     """
-    Calculates the correction based on the current dataset for the run.
+    Calculates the correction based on the current dataset for the run. Clears the previous dataset.
     """
     state = get_correction_state(correction_id)
     camera = zivid_app.get_connected_camera(state.serial_number)
@@ -107,12 +108,14 @@ async def write_correction_dataset(correction_id: str):
     )
     logger.info("Writing correction to camera...")
     zivid.experimental.calibration.write_camera_correction(camera, correction)
+    del correction_states[correction_id]
 
 
 @router.delete("/{correction_id}")
-async def delete_correction_dataset(correction_id: str) -> str:
+async def delete_correction_dataset(correction_id: str):
     """ """
-    return "hello world"
+    if correction_id in correction_states:
+        del correction_states[correction_id]
 
 
 def get_correction_state(correction_id: str) -> Infield_Correction_State:
