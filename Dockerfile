@@ -25,8 +25,9 @@ ENV POETRY_NO_INTERACTION=1 \
     POETRY_VIRTUALENVS_CREATE=1 \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
+FROM base AS runtime
 
-FROM base AS builder
+ENV VIRTUAL_ENV=/zivid-nova/.venv PATH="/zivid-nova/.venv/bin:$PATH"
 
 WORKDIR /zivid-nova
 
@@ -34,15 +35,11 @@ WORKDIR /zivid-nova
 COPY pyproject.toml poetry.lock ./
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --no-dev
 
-FROM base AS runtime
-
-ENV VIRTUAL_ENV=/zivid-nova/.venv PATH="/zivid-nova/.venv/bin:$PATH"
-
-COPY pyproject.toml poetry.lock ./
-COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
-
 # zivid_nova package
 COPY static/ static/
 COPY zivid_nova/ ./zivid_nova/
 
-ENTRYPOINT ["poetry", "run", "serve"]
+# need to install again, otherwise poetry complains with warning that the serve script is not installed
+RUN poetry install --no-dev
+
+ENTRYPOINT ["tail", "-f", "/dev/null"]
