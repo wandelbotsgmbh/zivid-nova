@@ -42,4 +42,4 @@ COPY zivid_nova/ ./zivid_nova/
 # need to install again, otherwise poetry complains with warning that the serve script is not installed
 RUN poetry install --no-dev
 
-ENTRYPOINT ["tail", "-f", "/dev/null"]
+ENTRYPOINT ["poetry", "run", "serve"]
