@@ -169,5 +169,5 @@ def verify_infield_input(infield_input: InfieldCorrectionInput):
 def verify_detection_result(detection_result: DetectionResult):
     if not detection_result.valid():
         raise HTTPException(
-            status_code=404, detail=f"Calibration board not detected! Feedback: {detection_result.status_description()}"
+            status_code=404, detail="Calibration board not detected!"
         )
