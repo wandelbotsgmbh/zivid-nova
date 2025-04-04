@@ -32,6 +32,11 @@ The first draft of the spec can be seen here [openapi.json](openapi.json).
 * `poetry run black zivid_nova`
 * `poetry run isort zivid_nova tests`
 
+### Pylint and Mypy
+
+* `poetry run pylint zivid_nova`
+* `poetry run mypy`
+
 ### YAML linting
 
 [prebuild image](https://hub.docker.com/r/cytopia/yamllint) is used for [yamllint](https://github.com/adrienverge/yamllint)

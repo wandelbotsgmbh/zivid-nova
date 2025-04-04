@@ -37,6 +37,7 @@ app.add_middleware(
 app.include_router(routes.calibrations.router)
 app.include_router(routes.cameras.router)
 app.include_router(routes.infield_correction.router)
+app.include_router(routes.projector.router)
 
 
 @app.get("/", response_class=HTMLResponse)
