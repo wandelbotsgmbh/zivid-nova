@@ -76,10 +76,10 @@ async def list_correction(serial_number: str) -> List[str]:
     List all correction run IDs for the given serial number.
     """
     zivid_app.get_connected_camera(serial_number)
-    correction_ids = []
-    for correction_id in correction_states.items():
-        if correction_states[correction_id].serial_number == serial_number:
-            correction_ids.append(correction_id)
+    correction_ids: List[str]  = []
+    for correction in correction_states.items():
+        if correction[1].serial_number == serial_number:
+            correction_ids.append(correction[0])
     return correction_ids
 
 
