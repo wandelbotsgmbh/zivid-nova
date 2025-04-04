@@ -77,7 +77,7 @@ async def list_correction(serial_number: str) -> List[str]:
     """
     zivid_app.get_connected_camera(serial_number)
     correction_ids = []
-    for correction_id in correction_states:
+    for correction_id in correction_states.items():
         if correction_states[correction_id].serial_number == serial_number:
             correction_ids.append(correction_id)
     return correction_ids
@@ -144,7 +144,7 @@ async def write_correction_dataset(correction_id: str):
 
 @router.delete("/correction/{correction_id}")
 async def delete_correction_dataset(correction_id: str):
-    """ """
+    """Deletes the correction dataset for this run."""
     if correction_id in correction_states:
         del correction_states[correction_id]
 
