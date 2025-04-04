@@ -1,5 +1,5 @@
 import uuid
-from typing import List
+from typing import Dict, List
 
 import zivid
 import zivid.calibration
@@ -14,14 +14,14 @@ from zivid_nova.models.infield_correction import AddCorrectionOffsetResp, Camera
 
 router = APIRouter(prefix="/infield-correction", tags=["infield-correction"])
 
-correction_states = {}
+correction_states: Dict[str, "Infield_Correction_State"] = {}
 
 
 class Infield_Correction_State:
     def __init__(self, serial_number: str, correction_id: str):
         self.serial_number = serial_number
         self.correction_id = correction_id
-        self.dataset = []
+        self.dataset: List[InfieldCorrectionInput] = []
 
 
 @router.get("")
