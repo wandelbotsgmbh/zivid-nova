@@ -34,6 +34,14 @@ async def get_camera(serial_number: str) -> Camera:
     return Camera.from_zivid_camera(zivid_app.get_connected_camera(serial_number))
 
 
+@router.delete("/{serial_number}")
+async def disconnect_camera(serial_number: str):
+    """Disconnects a camera by serial number"""
+    camera = zivid_app.get_camera(serial_number)
+    if camera.state.connected:
+        camera.disconnect()
+
+
 @router.get("/{serial_number}/frame", responses={200: {"content": {"application/octet-stream": {}}}})
 async def get_camera_frame(
     serial_number: str,
