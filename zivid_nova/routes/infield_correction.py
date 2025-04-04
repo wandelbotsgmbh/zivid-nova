@@ -31,8 +31,7 @@ async def read(serial_number: str) -> str:
     if zivid.experimental.calibration.has_camera_correction(camera):
         timestamp = zivid.experimental.calibration.camera_correction_timestamp(camera)
         return timestamp.strftime(r"%Y-%m-%d %H:%M:%S")
-    else:
-        raise HTTPException(status_code=404, detail="No infield correction found on camera.")
+    raise HTTPException(status_code=404, detail="No infield correction found on camera.")
 
 
 @router.get("/verification")
