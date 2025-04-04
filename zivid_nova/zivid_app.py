@@ -14,7 +14,7 @@ try:
     app = zivid.Application()
 except RuntimeError:
     app = None
-    logger.warning("Could not initialize zivid application. Probably no graphics card available.")
+    logger.warning("Could not initialize zivid application. Probably no GPU available.")
 
 camera_cache: dict[str, zivid.Camera] = {}
 
