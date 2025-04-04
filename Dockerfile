@@ -1,4 +1,4 @@
-FROM python:3.11 AS builder
+FROM python:3.11 AS base
 
 # install all zivid SDK and all required dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -25,31 +25,21 @@ ENV POETRY_NO_INTERACTION=1 \
     POETRY_VIRTUALENVS_CREATE=1 \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
-WORKDIR /zivid-nova
-COPY pyproject.toml poetry.lock ./
-COPY zivid_nova/ ./zivid_nova/
-
-# install everything into single venv
-RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --no-dev # install dependencies
-RUN --mount=type=cache,target=$POETRY_CACHE_DIR  poetry run pip install .  # zivid_nova package
-
-FROM python:3.11-slim AS runtime
+FROM base AS runtime
 
 ENV VIRTUAL_ENV=/zivid-nova/.venv PATH="/zivid-nova/.venv/bin:$PATH"
 
-COPY --from=builder ./*.deb ./*.ddeb ./
+WORKDIR /zivid-nova
 
-# install all zivid SDK and all required dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgl1-mesa-glx=* \
-    libglib2.0-0=* && \
-    apt-get install -y --no-install-recommends ./*.deb && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    rm -rf ./*.deb ./*.ddeb
+# install dependencies
+COPY pyproject.toml poetry.lock ./
+RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --no-dev
 
-
-COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+# zivid_nova package
 COPY static/ static/
+COPY zivid_nova/ ./zivid_nova/
 
-ENTRYPOINT ["python", "-m", "zivid_nova"]
+# need to install again, otherwise poetry complains with warning that the serve script is not installed
+RUN poetry install --no-dev
+
+ENTRYPOINT ["poetry", "run", "serve"]
