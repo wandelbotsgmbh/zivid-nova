@@ -4,9 +4,9 @@ import zivid
 from fastapi import APIRouter
 from loguru import logger
 from zivid.projection import ProjectedImage, projector_resolution, show_image_bgra
-from zivid_nova.zivid_app import zivid_lock
 
 from zivid_nova import zivid_app
+from zivid_nova.zivid_app import zivid_lock
 
 router = APIRouter(prefix="/projectors", tags=["projectors"])
 

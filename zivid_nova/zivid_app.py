@@ -1,7 +1,8 @@
 from datetime import timedelta
+from functools import wraps
 from pathlib import Path
 from threading import Lock
-from functools import wraps
+
 import zivid
 import zivid.capture_assistant
 from loguru import logger
@@ -112,11 +113,14 @@ def get_camera_frame2d(camera: zivid.Camera) -> zivid.Frame2D:
 
     raise ValueError("Unhandled frame type")
 
+
 _lock = Lock()
+
 
 def zivid_lock(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         with _lock:
             return f(*args, **kwargs)
+
     return decorated
