@@ -16,11 +16,13 @@ from zivid_nova.models.capture_settings_preset import CaptureSettingsPreset
 from zivid_nova.models.downsample_factor import DownsampleFactor
 from zivid_nova.models.pose import Pose
 from zivid_nova.utilities import is_rerun_enabled, rgba_to_rgb
+from zivid_nova.zivid_app import zivid_lock
 
 router = APIRouter(prefix="/cameras", tags=["cameras"])
 
 
 @router.get("")
+@zivid_lock
 def get_cameras() -> list[Camera]:
     """Get all cameras"""
 
@@ -28,6 +30,7 @@ def get_cameras() -> list[Camera]:
 
 
 @router.get("/{serial_number}")
+@zivid_lock
 def get_camera(serial_number: str) -> Camera:
     """Get a camera by serial number"""
 
@@ -35,6 +38,7 @@ def get_camera(serial_number: str) -> Camera:
 
 
 @router.delete("/{serial_number}")
+@zivid_lock
 def disconnect_camera(serial_number: str):
     """Disconnects a camera by serial number"""
     camera = zivid_app.get_camera(serial_number)
@@ -43,6 +47,7 @@ def disconnect_camera(serial_number: str):
 
 
 @router.get("/{serial_number}/frame", responses={200: {"content": {"application/octet-stream": {}}}})
+@zivid_lock
 def get_camera_frame(
     serial_number: str,
     down_sample_factor: DownsampleFactor = DownsampleFactor.NONE,
@@ -59,6 +64,7 @@ def get_camera_frame(
 
 
 @router.get("/{serial_number}/frame/pointcloud", responses={200: {"content": {"application/octet-stream": {}}}})
+@zivid_lock
 def get_camera_frame_pointcloud(
     serial_number: str,
     down_sample_factor: DownsampleFactor = DownsampleFactor.NONE,
@@ -97,6 +103,7 @@ def get_camera_frame_pointcloud(
 
 
 @router.get("/{serial_number}/frame/color-image", responses={200: {"content": {"image/png": {}}}})
+@zivid_lock
 def get_camera_frame_color_image(
     serial_number: str,
     down_sample_factor: DownsampleFactor = DownsampleFactor.NONE,
@@ -117,6 +124,7 @@ def get_camera_frame_color_image(
 
 
 @router.get("/{serial_number}/frame/depth-image", responses={200: {"content": {"image/png": {}}}})
+@zivid_lock
 def get_camera_frame_depth_image(
     serial_number: str,
     down_sample_factor: DownsampleFactor = DownsampleFactor.NONE,
@@ -138,6 +146,7 @@ def get_camera_frame_depth_image(
 
 
 @router.get("/{serial_number}/frame/board-pose")
+@zivid_lock
 def get_camera_frame_board_pose(serial_number: str) -> Pose:
     """Get the pose of the calibration board in the camera frame"""
 
@@ -151,6 +160,7 @@ def get_camera_frame_board_pose(serial_number: str) -> Pose:
 
 
 @router.get("/{serial_number}/frame2d", responses={200: {"content": {"image/png": {}}}})
+@zivid_lock
 def get_camera_frame2d_color(serial_number: str) -> Response:
     """Get a color image from a camera"""
 
@@ -165,6 +175,7 @@ def get_camera_frame2d_color(serial_number: str) -> Response:
 
 
 @router.get("/{serial_number}/firmware/up-to-date")
+@zivid_lock
 def get_camera_firmware_up_to_date(serial_number: str) -> bool:
     """Check if the camera firmware is up to date"""
 
@@ -176,6 +187,7 @@ def get_camera_firmware_up_to_date(serial_number: str) -> bool:
 
 
 @router.post("/{serial_number}/firmware/update")
+@zivid_lock
 def update_camera_firmware(serial_number: str):
     """Update the camera firmware if necessary. Also performs downgrades."""
 

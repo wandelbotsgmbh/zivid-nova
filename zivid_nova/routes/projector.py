@@ -4,6 +4,7 @@ import zivid
 from fastapi import APIRouter
 from loguru import logger
 from zivid.projection import ProjectedImage, projector_resolution, show_image_bgra
+from zivid_nova.zivid_app import zivid_lock
 
 from zivid_nova import zivid_app
 
@@ -13,6 +14,7 @@ handles: Dict[str, ProjectedImage] = {}
 
 
 @router.post("/{serial_number}")
+@zivid_lock
 def project_test_image(serial_number: str):
     """
     Starts projection of a testimage for calibration board adjustment.
@@ -35,6 +37,7 @@ def project_test_image(serial_number: str):
 
 
 @router.delete("/{serial_number}")
+@zivid_lock
 def delete_projection(serial_number: str):
     """
     Stops the projection for the given camera.

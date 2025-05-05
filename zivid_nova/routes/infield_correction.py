@@ -11,6 +11,7 @@ from zivid.experimental.calibration import InfieldCorrectionInput
 
 from zivid_nova import zivid_app
 from zivid_nova.models.infield_correction import AddCorrectionOffsetResp, CameraVerification
+from zivid_nova.zivid_app import zivid_lock
 
 router = APIRouter(prefix="/infield-correction", tags=["infield-correction"])
 
@@ -25,6 +26,7 @@ class Infield_Correction_State:
 
 
 @router.get("")
+@zivid_lock
 def read(serial_number: str) -> str:
     """the read function will return the last time an infield correction was written to the camera."""
     camera = zivid_app.get_connected_camera(serial_number)
@@ -35,6 +37,7 @@ def read(serial_number: str) -> str:
 
 
 @router.get("/verification")
+@zivid_lock
 def verify(serial_number: str) -> CameraVerification:
     """
     This function uses a single capture to determine the local dimension trueness error
@@ -61,6 +64,7 @@ def verify(serial_number: str) -> CameraVerification:
 
 
 @router.delete("")
+@zivid_lock
 def reset(serial_number: str):
     """
     Using reset will remove any infield correction that has been applied in previous correct instances.
@@ -71,6 +75,7 @@ def reset(serial_number: str):
 
 
 @router.get("/correction")
+@zivid_lock
 def list_correction(serial_number: str) -> List[str]:
     """
     List all correction run IDs for the given serial number.
@@ -84,6 +89,7 @@ def list_correction(serial_number: str) -> List[str]:
 
 
 @router.post("/correction")
+@zivid_lock
 def start_correction(serial_number: str) -> str:
     """
     Will start a new correction run, by collection a dataset under the returned ID.
@@ -95,6 +101,7 @@ def start_correction(serial_number: str) -> str:
 
 
 @router.post("/correction/{correction_id}")
+@zivid_lock
 def add_correction_dataset(correction_id: str) -> AddCorrectionOffsetResp:
     """
     Add a new dataset to the correction run.
@@ -126,6 +133,7 @@ def add_correction_dataset(correction_id: str) -> AddCorrectionOffsetResp:
 
 
 @router.put("/correction/{correction_id}")
+@zivid_lock
 def write_correction_dataset(correction_id: str):
     """
     Calculates the correction based on the current dataset for the run. Clears the previous dataset.
@@ -143,6 +151,7 @@ def write_correction_dataset(correction_id: str):
 
 
 @router.delete("/correction/{correction_id}")
+@zivid_lock
 def delete_correction_dataset(correction_id: str):
     """Deletes the correction dataset for this run."""
     if correction_id in correction_states:
