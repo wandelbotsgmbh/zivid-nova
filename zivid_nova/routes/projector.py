@@ -13,7 +13,7 @@ handles: Dict[str, ProjectedImage] = {}
 
 
 @router.post("/{serial_number}")
-async def project_test_image(serial_number: str):
+def project_test_image(serial_number: str):
     """
     Starts projection of a testimage for calibration board adjustment.
     Stops the previous projection.
@@ -35,7 +35,7 @@ async def project_test_image(serial_number: str):
 
 
 @router.delete("/{serial_number}")
-async def delete_projection(serial_number: str):
+def delete_projection(serial_number: str):
     """
     Stops the projection for the given camera.
     """

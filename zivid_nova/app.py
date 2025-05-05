@@ -41,7 +41,7 @@ app.include_router(routes.projector.router)
 
 
 @app.get("/", response_class=HTMLResponse)
-async def root():
+def root():
     # One could serve a nice UI here as well. For simplicity and discoverability, we show the Stoplight UI
     return f"""
     <!doctype html>
@@ -69,12 +69,12 @@ async def root():
 
 
 @app.get("/version")
-async def get_version():
+def get_version():
     return {"zivid_nova": version, "zivid_sdk": zivid.__version__}
 
 
 @app.get("/app_icon.png", summary="Services the app icon for the homescreen")
-async def get_app_icon():
+def get_app_icon():
     try:
         return FileResponse(path="static/app_icon.png", media_type="image/png")
     except FileNotFoundError as e:
