@@ -1,14 +1,10 @@
-import random
-import time
 import zivid
-import zivid.application
 from decouple import config
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 
 from zivid_nova import routes
-from zivid_nova.zivid_app import zivid_lock, _lock
 
 BASE_PATH = config("BASE_PATH", default="", cast=str)
 
@@ -82,18 +78,3 @@ def get_app_icon():
         return FileResponse(path="static/app_icon.png", media_type="image/png")
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail="Icon not found") from e
-
-@app.get("/slow-locked")
-@zivid_lock
-def get_slow_locked():
-    time.sleep(30)
-    return f"slow locked {random.random()}"
-
-@app.get("/fast-locked")
-@zivid_lock
-def get_fast_locked():
-    return f"fast locked {random.random()}"
-
-@app.get("/fast")
-def get_fast_locked():
-    return f"fast {random.random()}"
