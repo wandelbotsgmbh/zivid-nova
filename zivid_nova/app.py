@@ -1,5 +1,4 @@
 import zivid
-import zivid.application
 from decouple import config
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware

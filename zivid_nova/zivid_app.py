@@ -1,9 +1,9 @@
 from datetime import timedelta
+from functools import wraps
 from pathlib import Path
+from threading import Lock
 
 import zivid
-import zivid.application
-import zivid.calibration
 import zivid.capture_assistant
 from loguru import logger
 
@@ -16,38 +16,38 @@ except RuntimeError:
     app = None
     logger.warning("Could not initialize zivid application. Probably no GPU available.")
 
-camera_cache: dict[str, zivid.Camera] = {}
+_camera_cache: dict[str, zivid.Camera] = {}
 
 
 def _update_camera_cache():
     """Update the camera cache"""
-    global camera_cache  # pylint: disable=global-statement
+    global _camera_cache  # pylint: disable=global-statement
 
     # Keep connected camera references because new references are not connected
-    camera_cache = {kv[0]: kv[1] for kv in camera_cache.items() if kv[1].state.connected}
+    _camera_cache = {kv[0]: kv[1] for kv in _camera_cache.items() if kv[1].state.connected}
 
     for camera in app.cameras():
-        if not camera.info.serial_number in camera_cache:
-            camera_cache[camera.info.serial_number] = camera
+        if not camera.info.serial_number in _camera_cache:
+            _camera_cache[camera.info.serial_number] = camera
 
 
 def get_cameras() -> list[zivid.Camera]:
     """Get a list of all cameras."""
 
     _update_camera_cache()
-    return list(camera_cache.values())
+    return list(_camera_cache.values())
 
 
 def get_camera(serial_number: str) -> zivid.Camera:
     """Get a camera by serial number. Does not check if the camera is connected."""
 
     # Check if camera is in cache. If not, update cache and try again
-    if not serial_number in camera_cache:
+    if not serial_number in _camera_cache:
         _update_camera_cache()
-        if not serial_number in camera_cache:
+        if not serial_number in _camera_cache:
             raise ValueError(f"Camera with serial number {serial_number} not found")
 
-    return camera_cache[serial_number]
+    return _camera_cache[serial_number]
 
 
 def get_connected_camera(serial_number: str) -> zivid.Camera:
@@ -61,7 +61,7 @@ def get_connected_camera(serial_number: str) -> zivid.Camera:
         if not camera.state.connected:
             camera.connect()
     except Exception as exc:
-        camera_cache.pop(serial_number)
+        _camera_cache.pop(serial_number)
         raise ValueError(f"Camera with serial number {serial_number} not found") from exc
 
     return camera
@@ -112,3 +112,15 @@ def get_camera_frame2d(camera: zivid.Camera) -> zivid.Frame2D:
         return frame
 
     raise ValueError("Unhandled frame type")
+
+
+_lock = Lock()
+
+
+def zivid_lock(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        with _lock:
+            return f(*args, **kwargs)
+
+    return decorated

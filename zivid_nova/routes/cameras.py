@@ -16,26 +16,30 @@ from zivid_nova.models.capture_settings_preset import CaptureSettingsPreset
 from zivid_nova.models.downsample_factor import DownsampleFactor
 from zivid_nova.models.pose import Pose
 from zivid_nova.utilities import is_rerun_enabled, rgba_to_rgb
+from zivid_nova.zivid_app import zivid_lock
 
 router = APIRouter(prefix="/cameras", tags=["cameras"])
 
 
 @router.get("")
-async def get_cameras() -> list[Camera]:
+@zivid_lock
+def get_cameras() -> list[Camera]:
     """Get all cameras"""
 
     return [Camera.from_zivid_camera(x) for x in zivid_app.get_cameras()]
 
 
 @router.get("/{serial_number}")
-async def get_camera(serial_number: str) -> Camera:
+@zivid_lock
+def get_camera(serial_number: str) -> Camera:
     """Get a camera by serial number"""
 
     return Camera.from_zivid_camera(zivid_app.get_connected_camera(serial_number))
 
 
 @router.delete("/{serial_number}")
-async def disconnect_camera(serial_number: str):
+@zivid_lock
+def disconnect_camera(serial_number: str):
     """Disconnects a camera by serial number"""
     camera = zivid_app.get_camera(serial_number)
     if camera.state.connected:
@@ -43,7 +47,8 @@ async def disconnect_camera(serial_number: str):
 
 
 @router.get("/{serial_number}/frame", responses={200: {"content": {"application/octet-stream": {}}}})
-async def get_camera_frame(
+@zivid_lock
+def get_camera_frame(
     serial_number: str,
     down_sample_factor: DownsampleFactor = DownsampleFactor.NONE,
     preset: CaptureSettingsPreset = CaptureSettingsPreset.AUTO,
@@ -59,7 +64,8 @@ async def get_camera_frame(
 
 
 @router.get("/{serial_number}/frame/pointcloud", responses={200: {"content": {"application/octet-stream": {}}}})
-async def get_camera_frame_pointcloud(
+@zivid_lock
+def get_camera_frame_pointcloud(
     serial_number: str,
     down_sample_factor: DownsampleFactor = DownsampleFactor.NONE,
     preset: CaptureSettingsPreset = CaptureSettingsPreset.AUTO,
@@ -97,7 +103,8 @@ async def get_camera_frame_pointcloud(
 
 
 @router.get("/{serial_number}/frame/color-image", responses={200: {"content": {"image/png": {}}}})
-async def get_camera_frame_color_image(
+@zivid_lock
+def get_camera_frame_color_image(
     serial_number: str,
     down_sample_factor: DownsampleFactor = DownsampleFactor.NONE,
     preset: CaptureSettingsPreset = CaptureSettingsPreset.AUTO,
@@ -117,7 +124,8 @@ async def get_camera_frame_color_image(
 
 
 @router.get("/{serial_number}/frame/depth-image", responses={200: {"content": {"image/png": {}}}})
-async def get_camera_frame_depth_image(
+@zivid_lock
+def get_camera_frame_depth_image(
     serial_number: str,
     down_sample_factor: DownsampleFactor = DownsampleFactor.NONE,
     preset: CaptureSettingsPreset = CaptureSettingsPreset.AUTO,
@@ -138,7 +146,8 @@ async def get_camera_frame_depth_image(
 
 
 @router.get("/{serial_number}/frame/board-pose")
-async def get_camera_frame_board_pose(serial_number: str) -> Pose:
+@zivid_lock
+def get_camera_frame_board_pose(serial_number: str) -> Pose:
     """Get the pose of the calibration board in the camera frame"""
 
     camera = zivid_app.get_connected_camera(serial_number)
@@ -151,7 +160,8 @@ async def get_camera_frame_board_pose(serial_number: str) -> Pose:
 
 
 @router.get("/{serial_number}/frame2d", responses={200: {"content": {"image/png": {}}}})
-async def get_camera_frame2d_color(serial_number: str) -> Response:
+@zivid_lock
+def get_camera_frame2d_color(serial_number: str) -> Response:
     """Get a color image from a camera"""
 
     camera = zivid_app.get_connected_camera(serial_number)
@@ -165,7 +175,8 @@ async def get_camera_frame2d_color(serial_number: str) -> Response:
 
 
 @router.get("/{serial_number}/firmware/up-to-date")
-async def get_camera_firmware_up_to_date(serial_number: str) -> bool:
+@zivid_lock
+def get_camera_firmware_up_to_date(serial_number: str) -> bool:
     """Check if the camera firmware is up to date"""
 
     camera = zivid_app.get_camera(serial_number)
@@ -176,7 +187,8 @@ async def get_camera_firmware_up_to_date(serial_number: str) -> bool:
 
 
 @router.post("/{serial_number}/firmware/update")
-async def update_camera_firmware(serial_number: str):
+@zivid_lock
+def update_camera_firmware(serial_number: str):
     """Update the camera firmware if necessary. Also performs downgrades."""
 
     camera = zivid_app.get_camera(serial_number)

@@ -7,7 +7,7 @@ from loguru import logger
 
 from zivid_nova.models.calibration import Calibration
 from zivid_nova.models.pose import Pose
-from zivid_nova.zivid_app import get_connected_camera
+from zivid_nova.zivid_app import get_connected_camera, zivid_lock
 
 router = APIRouter(prefix="/calibrations", tags=["calibrations"])
 
@@ -15,21 +15,24 @@ calibrations: dict[str, Calibration] = {}
 
 
 @router.get("")
-async def get_calibrations() -> list[Calibration]:
+@zivid_lock
+def get_calibrations() -> list[Calibration]:
     """Get all calibrations"""
 
     return list(calibrations.values())
 
 
 @router.delete("")
-async def delete_calibrations():
+@zivid_lock
+def delete_calibrations():
     """Delete all calibrations"""
 
     calibrations.clear()
 
 
 @router.post("")
-async def start_calibration(serial_number: str) -> Calibration:
+@zivid_lock
+def start_calibration(serial_number: str) -> Calibration:
     """Start a new calibration"""
 
     camera = get_connected_camera(serial_number)
@@ -45,14 +48,16 @@ async def start_calibration(serial_number: str) -> Calibration:
 
 
 @router.get("/{calibration_id}")
-async def get_calibration(calibration_id: str) -> Calibration:
+@zivid_lock
+def get_calibration(calibration_id: str) -> Calibration:
     """Get a calibration by ID"""
 
     return calibrations[calibration_id]
 
 
 @router.post("/{calibration_id}")
-async def add_calibration_pose(calibration_id: str, pose: Pose) -> Calibration:
+@zivid_lock
+def add_calibration_pose(calibration_id: str, pose: Pose) -> Calibration:
     """Add a calibration pose to a calibration"""
 
     calibration = calibrations[calibration_id]
@@ -90,7 +95,8 @@ async def add_calibration_pose(calibration_id: str, pose: Pose) -> Calibration:
 
 
 @router.delete("/{calibration_id}")
-async def delete_calibration(calibration_id: str):
+@zivid_lock
+def delete_calibration(calibration_id: str):
     """Delete a calibration by ID"""
 
     del calibrations[calibration_id]
