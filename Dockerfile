@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rm -rf /var/lib/apt/lists/*
 
 RUN pip install --upgrade pip \
-    && pip install poetry==1.8.2
+    && pip install poetry==2.1.3
 
 ENV POETRY_NO_INTERACTION=1 \
     POETRY_VIRTUALENVS_IN_PROJECT=1 \
@@ -33,13 +33,12 @@ WORKDIR /zivid-nova
 
 # install dependencies
 COPY pyproject.toml poetry.lock ./
-RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --no-dev
+RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
 
-# zivid_nova package
 COPY static/ static/
 COPY zivid_nova/ ./zivid_nova/
 
-# need to install again, otherwise poetry complains with warning that the serve script is not installed
-RUN poetry install --no-dev
+# install root package
+RUN poetry install --without dev
 
 ENTRYPOINT ["poetry", "run", "serve"]
