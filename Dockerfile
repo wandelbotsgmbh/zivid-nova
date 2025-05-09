@@ -31,12 +31,14 @@ ENV VIRTUAL_ENV=/zivid-nova/.venv PATH="/zivid-nova/.venv/bin:$PATH"
 
 WORKDIR /zivid-nova
 
-# copy package
+# Install dependencies
 COPY pyproject.toml poetry.lock ./
+RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
+
 COPY static/ static/
 COPY zivid_nova/ ./zivid_nova/
 
-# install dependencies
-RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev
+# nstall root package
+RUN poetry install --without dev
 
 ENTRYPOINT ["poetry", "run", "serve"]
