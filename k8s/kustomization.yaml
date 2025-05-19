@@ -6,7 +6,7 @@ namespace: cell
 
 resources:
   - app.yaml
-  
+
 images:
   - name: wandelbots.azurecr.io/nova-services/zivid-intel
     newTag: 0.0.1

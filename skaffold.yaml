@@ -9,7 +9,7 @@ build:
         dockerfile: Dockerfile
         buildArgs:
           platform: "linux/amd64"
-      
+
 manifests:
   kustomize:
     paths:
