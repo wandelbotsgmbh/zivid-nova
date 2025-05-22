@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "zivid-nova"
-version = "1.5.2"
+version = "1.6.0"
 description = "Nova plugin for Zivid 3D cameras."
 authors = [
     "Patrick Schmager <patrick.schmager@wandelbots.com>",
