@@ -1,0 +1,26 @@
+---
+apiVersion: skaffold/v4beta11
+kind: Config
+metadata:
+  name: zivid-nova
+build:
+  artifacts:
+    - image: wandelbots.azurecr.io/nova-services/zivid-intel
+      docker:
+        dockerfile: Dockerfile
+        buildArgs:
+          platform: "linux/amd64"
+
+manifests:
+  kustomize:
+    paths:
+      - k8s
+
+# we have to explicitly whitelist CRDs for skaffolds image replacement
+# see https://github.com/GoogleContainerTools/skaffold/issues/4081
+# and https://skaffold.dev/docs/tutorials/skaffold-resource-selector/
+resourceSelector:
+  allow:
+    - groupKind: "App.wandelbots.com"
+      image: [".*"]
+      labels: [".*"]

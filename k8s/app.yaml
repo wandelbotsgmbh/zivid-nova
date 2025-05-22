@@ -1,0 +1,16 @@
+---
+apiVersion: wandelbots.com/v1alpha1
+kind: App
+metadata:
+  name: zivid
+spec:
+  appIcon: app_icon.png
+  cellName: cell
+  image: wandelbots.azurecr.io/nova-services/zivid-intel:0.0.1
+  imagePullSecrets:
+    - name: pull-secret-wandelbots-azurecr-io
+  port: 8080
+  # Zivid currently supports only intel (integrated) gpus.
+  resources:
+    limits:
+      gpu.intel.com/i915: 1
