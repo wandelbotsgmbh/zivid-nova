@@ -2,12 +2,12 @@ from typing import Any, Optional
 
 import zivid
 import zivid.calibration
+from loguru import logger
 from pydantic import BaseModel, ConfigDict, Field
 
 from zivid_nova.models.calibration_residual import CalibrationResidual
 from zivid_nova.models.pose import Pose
 
-from loguru import logger
 
 class Calibration(BaseModel):
     """Calibration data structure with pydantic serialization"""
@@ -30,7 +30,6 @@ class Calibration(BaseModel):
 
     hand_eye_calibration: Optional[Pose]
     """Hand-Eye calibration pose"""
-
 
     def _assert_input_is_valid(self) -> None:
         if len(self.poses) != len(self.detection_results):
@@ -59,9 +58,9 @@ class Calibration(BaseModel):
         if len(self.poses) < 2:
             logger.info("Not enough calibration poses to compute hand-eye calibration.")
             return
-        
+
         hand_eye_input = []
-    
+
         for calibration_pose, detection_result in zip(self.poses, self.detection_results):
             hand_eye_input.append(zivid.calibration.HandEyeInput(calibration_pose.to_zivid_pose(), detection_result))
 

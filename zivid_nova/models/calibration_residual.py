@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from zivid.calibration import HandEyeResidual
 
+
 class CalibrationResidual(BaseModel):
     """Calibration residual data structure with pydantic serialization"""
 
@@ -10,7 +11,6 @@ class CalibrationResidual(BaseModel):
     rotation: float
     """Rotation residual in degrees"""
 
-    
     @classmethod
     def from_zivid(cls, residual: HandEyeResidual) -> "CalibrationResidual":
         """Create a CalibrationResidual instance from a zivid HandEyeResidual instance"""
