@@ -16,7 +16,7 @@ jobs:
           echo "PR Title: $PR_TITLE"
 
           # Define the allowed pattern
-          PATTERN='^(chore|feat|fix)(!?)((\([A-Za-z0-9-]+\)))?: .+'
+          PATTERN='^(chore|feat|fix)((\([A-Za-z0-9-]+\)))?(!?): .+'
 
           if [[ "$PR_TITLE" =~ $PATTERN ]]; then
             echo "✅ PR title is valid."
