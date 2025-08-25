@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zivid
+  labels:
+    app: zivid
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: zivid
+  template:
+    metadata:
+      labels:
+        app: zivid
+    spec:
+      containers:
+        - name: zivid
+          image: wandelbots.azurecr.io/nova-services/zivid-intel:2.1.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: LOG_LEVEL
+              value: info
+            - name: BASE_PATH
+              value: "/zivid"
+            - name: PORT
+              value: "8033"
+          resources:
+            limits:
+              gpu.intel.com/i915: "1"
+            requests:
+              gpu.intel.com/i915: "1"
+      imagePullSecrets:
+        - name: pull-secret-wandelbots-azurecr-io
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zivid
+spec:
+  selector:
+    app: zivid
+  ports:
+    - port: 8033
+      targetPort: 8033
+      protocol: TCP
+      name: http
+  type: ClusterIP
