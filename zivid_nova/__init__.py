@@ -20,6 +20,7 @@ _BANNER = r"""
 
 def main(host: str = "0.0.0.0", port: int = 8080):
     log_level = os.getenv("LOG_LEVEL", "info")
+    port = int(os.getenv("PORT", port))
     logger.info(_BANNER)
     logger.info("Starting Service...")
     if is_rerun_enabled():

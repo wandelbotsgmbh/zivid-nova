@@ -1,0 +1,16 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: zivid
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /zivid
+            pathType: Prefix
+            backend:
+              service:
+                name: zivid
+                port:
+                  name: http

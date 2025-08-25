@@ -64,3 +64,28 @@ $ nova app install
 ```bash
 $ docker buildx build --platform linux/amd64 -t wandelbots.azurecr.io/nova-services/zivid-intel --push .
 ```
+
+## Issues
+
+* autodiscovery not working 
+
+Due to network isolation in kubernetes environments, the autodiscovery feature of the zivid will not work right now within Wandelbots NOVA.
+This will only be an issue, if you are using a non default camera IP Address.
+You still can use the zivid plugin, by running `kubectl apply -k k8s-native`.
+
+Zivid will then be reachable via `host/zivid`.
+This approach will use the `hostNetwork` feature of kubernetes, therefore any required port, must be available on the host.
+If you need to adjust the port, please check `k8s-native/deployment.yaml` and adjust the ports there (e.g. by replace all `8033`).
+
+You might need to get the kubeconfig before execcuting this command:
+```
+# copy the config from the host
+scp nova.admin@yourhost:/etc/rancher/k3s/k3s.yaml ./kubeconfig
+# now adjust the host within the kubeconfig file
+
+# export the config, so that kubectl will use it
+export KUBECONFIG="kubeconfig"
+
+# apply the config
+kubectl apply -k k8s-native
+```

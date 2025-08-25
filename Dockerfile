@@ -2,8 +2,8 @@ FROM python:3.11 AS base
 
 # install all zivid SDK and all required dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgl1-mesa-glx=* \
-    libglib2.0-0=* && \
+    libgl1=* \
+    libglx-mesa0=* &&\
     wget --progress=dot:giga \
         https://downloads.zivid.com/sdk/releases/2.14.1+b4e8f261-1/u22/amd64/zivid_2.14.1+b4e8f261-1_amd64.deb \
         https://github.com/intel/intel-graphics-compiler/releases/download/igc-1.0.12149.1/intel-igc-core_1.0.12149.1_amd64.deb \
