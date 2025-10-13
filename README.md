@@ -25,6 +25,8 @@ $ nova catalog install zivid-intel
 
 The first draft of the spec can be seen here [openapi.json](openapi.json).
 
+The OpenAPI documentation UI is powered by [Stoplight Elements](https://github.com/stoplightio/elements), served locally from the `static/` directory for offline usage. The UI version can be checked via the `/version` endpoint.
+
 ## Development
 
 ### Formatting
