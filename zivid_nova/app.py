@@ -3,12 +3,16 @@ from decouple import config
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
 
 from zivid_nova import routes
 
 BASE_PATH = config("BASE_PATH", default="", cast=str)
 
 version = "dev"
+
+# Stoplight Elements version for offline UI
+STOPLIGHT_VERSION = "9.0.8"
 
 app = FastAPI(
     title="Zivid Nova Plugin",
@@ -38,6 +42,9 @@ app.include_router(routes.cameras.router)
 app.include_router(routes.infield_correction.router)
 app.include_router(routes.projector.router)
 
+# Mount static files for offline Stoplight Elements
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
@@ -50,8 +57,8 @@ async def root():
             <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
             <title>Elements in HTML</title>
             <!-- Embed elements Elements via Web Component -->
-            <script src="https://unpkg.com/@stoplight/elements/web-components.min.js"></script>
-            <link rel="stylesheet" href="https://unpkg.com/@stoplight/elements/styles.min.css">
+            <script src="{BASE_PATH}/static/stoplight-{STOPLIGHT_VERSION}/web-components.min.js"></script>
+            <link rel="stylesheet" href="{BASE_PATH}/static/stoplight-{STOPLIGHT_VERSION}/styles.min.css">
           </head>
           <body>
 
@@ -69,7 +76,11 @@ async def root():
 
 @app.get("/version")
 async def get_version():
-    return {"zivid_nova": version, "zivid_sdk": zivid.__version__}
+    return {
+        "zivid_nova": version,
+        "zivid_sdk": zivid.__version__,
+        "stoplight_elements": STOPLIGHT_VERSION,
+    }
 
 
 @app.get("/app_icon.png", summary="Services the app icon for the homescreen")

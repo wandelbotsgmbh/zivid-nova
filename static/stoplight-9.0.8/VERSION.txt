@@ -1,0 +1,13 @@
+Stoplight Elements Version: 9.0.8
+Downloaded: 2025-10-13
+Source: https://unpkg.com/@stoplight/elements@9.0.8/
+NPM Package: @stoplight/elements
+
+Files:
+- web-components.min.js (2.0 MB)
+- styles.min.css (291 KB)
+
+To update to a newer version:
+1. Check latest version: npm view @stoplight/elements version
+2. Download files from: https://unpkg.com/@stoplight/elements@<VERSION>/
+3. Update STOPLIGHT_VERSION constant in zivid_nova/app.py
