@@ -1,7 +1,8 @@
+import os
 from datetime import timedelta
 from functools import wraps
 from pathlib import Path
-from threading import Lock
+from threading import Lock, Thread
 
 import zivid
 import zivid.capture_assistant
@@ -17,6 +18,12 @@ except RuntimeError:
     logger.warning("Could not initialize zivid application. Probably no GPU available.")
 
 _camera_cache: dict[str, zivid.Camera] = {}
+_warmed: bool = False
+_ENABLE_WARMUP = os.getenv("ZIVID_ENABLE_WARMUP", "true").lower() in (
+    "true",
+    "1",
+    "yes",
+)
 
 
 def _update_camera_cache():
@@ -24,10 +31,12 @@ def _update_camera_cache():
     global _camera_cache  # pylint: disable=global-statement
 
     # Keep connected camera references because new references are not connected
-    _camera_cache = {kv[0]: kv[1] for kv in _camera_cache.items() if kv[1].state.connected}
+    _camera_cache = {
+        kv[0]: kv[1] for kv in _camera_cache.items() if kv[1].state.connected
+    }
 
     for camera in app.cameras():
-        if not camera.info.serial_number in _camera_cache:
+        if camera.info.serial_number not in _camera_cache:
             _camera_cache[camera.info.serial_number] = camera
 
 
@@ -42,9 +51,9 @@ def get_camera(serial_number: str) -> zivid.Camera:
     """Get a camera by serial number. Does not check if the camera is connected."""
 
     # Check if camera is in cache. If not, update cache and try again
-    if not serial_number in _camera_cache:
+    if serial_number not in _camera_cache:
         _update_camera_cache()
-        if not serial_number in _camera_cache:
+        if serial_number not in _camera_cache:
             raise ValueError(f"Camera with serial number {serial_number} not found")
 
     return _camera_cache[serial_number]
@@ -62,12 +71,47 @@ def get_connected_camera(serial_number: str) -> zivid.Camera:
             camera.connect()
     except Exception as exc:
         _camera_cache.pop(serial_number)
-        raise ValueError(f"Camera with serial number {serial_number} not found") from exc
+        raise ValueError(
+            f"Camera with serial number {serial_number} not found"
+        ) from exc
 
     return camera
 
 
-def _get_settings(camera: zivid.Camera, preset: CaptureSettingsPreset) -> zivid.Settings:
+def _warm_up():
+    """Perform a minimal capture to compile kernels and prime camera pipeline."""
+    global _warmed  # pylint: disable=global-statement
+    if not _ENABLE_WARMUP:
+        logger.info("Zivid warm-up disabled via ZIVID_ENABLE_WARMUP=false")
+        _warmed = True  # mark as warmed to pass health checks
+        return
+    if _warmed or app is None:
+        return
+    cams = get_cameras()
+    if not cams:
+        logger.warning("No cameras found for warm-up.")
+        return
+    camera = cams[0]
+    try:
+        if not camera.state.connected:
+            camera.connect()
+        settings = zivid.Settings()
+        settings.acquisitions.append(zivid.Settings.Acquisition())
+        camera.capture(settings)  # discard result
+        _warmed = True
+        logger.info("Zivid warm-up capture complete.")
+    except Exception as e:  # pragma: no cover
+        logger.warning(f"Warm-up failed: {e}")
+
+
+# Trigger warm-up in background thread to avoid blocking server startup
+_warmup_thread = Thread(target=_warm_up, daemon=True, name="zivid-warmup")
+_warmup_thread.start()
+
+
+def _get_settings(
+    camera: zivid.Camera, preset: CaptureSettingsPreset
+) -> zivid.Settings:
     """Get settings for a camera and a preset. Loads settings from file or suggests settings if preset is AUTO"""
 
     if preset is CaptureSettingsPreset.AUTO:
@@ -75,14 +119,18 @@ def _get_settings(camera: zivid.Camera, preset: CaptureSettingsPreset) -> zivid.
             max_capture_time=timedelta(milliseconds=800),
             ambient_light_frequency=zivid.capture_assistant.SuggestSettingsParameters.AmbientLightFrequency.none,
         )
-        return zivid.capture_assistant.suggest_settings(camera, suggest_settings_parameters)
+        return zivid.capture_assistant.suggest_settings(
+            camera, suggest_settings_parameters
+        )
 
     settings_file = str(Path(__file__).parent / "resources" / preset.to_filename())
     return zivid.Settings.load(settings_file)
 
 
 def get_camera_frame(
-    camera: zivid.Camera, down_sample_factor: DownsampleFactor, preset: CaptureSettingsPreset
+    camera: zivid.Camera,
+    down_sample_factor: DownsampleFactor,
+    preset: CaptureSettingsPreset,
 ) -> zivid.Frame:
     """Get a frame from a camera. Downsample the point cloud if requested"""
     settings = _get_settings(camera, preset)
@@ -99,7 +147,9 @@ def get_camera_frame(
 def _get_settings2d() -> zivid.Settings2D:
     """Get settings2d for a camera"""
 
-    settings_file = str(Path(__file__).parent / "resources/Zivid2_Settings_Zivid_Two_M70_Default2D.yml")
+    settings_file = str(
+        Path(__file__).parent / "resources/Zivid2_Settings_Zivid_Two_M70_Default2D.yml"
+    )
     return zivid.Settings2D.load(settings_file)
 
 

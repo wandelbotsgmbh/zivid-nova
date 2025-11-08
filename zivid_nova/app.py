@@ -83,6 +83,17 @@ async def get_version():
     }
 
 
+@app.get("/healthz")
+async def healthz():
+    """Health check endpoint that reports warm-up status."""
+    from zivid_nova import zivid_app
+
+    return {
+        "warmed": getattr(zivid_app, "_warmed", False),
+        "warmup_enabled": getattr(zivid_app, "_ENABLE_WARMUP", False),
+    }
+
+
 @app.get("/app_icon.png", summary="Services the app icon for the homescreen")
 async def get_app_icon():
     try:

@@ -28,6 +28,15 @@ spec:
               value: "/zivid"
             - name: PORT
               value: "8033"
+            - name: ZIVID_ENABLE_WARMUP
+              value: "true"
+          readinessProbe:
+            httpGet:
+              path: /zivid/healthz
+              port: 8033
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 6
           resources:
             limits:
               gpu.intel.com/i915: "1"
