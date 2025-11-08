@@ -97,16 +97,24 @@ def _warm_up():
             camera.connect()
         settings = zivid.Settings()
         settings.acquisitions.append(zivid.Settings.Acquisition())
-        camera.capture(settings)  # discard result
+        _ = camera.capture(settings)  # discard result
         _warmed = True
         logger.info("Zivid warm-up capture complete.")
-    except Exception as e:  # pragma: no cover
-        logger.warning(f"Warm-up failed: {e}")
+    except Exception as exc:  # pragma: no cover
+        logger.warning(f"Warm-up failed: {exc}")
 
 
 # Trigger warm-up in background thread to avoid blocking server startup
 _warmup_thread = Thread(target=_warm_up, daemon=True, name="zivid-warmup")
 _warmup_thread.start()
+
+
+def get_warmup_status() -> dict[str, bool]:
+    """Get the current warm-up status for health checks."""
+    return {
+        "warmed": _warmed,
+        "warmup_enabled": _ENABLE_WARMUP,
+    }
 
 
 def _get_settings(
