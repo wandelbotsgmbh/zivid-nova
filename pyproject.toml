@@ -22,6 +22,7 @@ scipy = "^1.14.1"
 pillow = "^10.4.0"
 rerun-sdk = "^0.20.3"
 point-cloud-utils = "^0.31.0"
+openexr = "^3.5.2"
 
 [tool.poetry.extras]
 all = ["zivid"]
