@@ -4,12 +4,13 @@ kind: Config
 metadata:
   name: zivid-nova
 build:
+  local:
+    useBuildkit: true
+  platforms: ["linux/amd64"]
   artifacts:
     - image: wandelbots.azurecr.io/nova-services/zivid-intel
       docker:
         dockerfile: Dockerfile
-        buildArgs:
-          platform: "linux/amd64"
 
 manifests:
   kustomize:
