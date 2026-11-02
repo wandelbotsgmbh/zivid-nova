@@ -5,6 +5,7 @@ import point_cloud_utils as pcu
 import rerun as rr
 import zivid
 import zivid.calibration
+import zivid.experimental.calibration
 import zivid.firmware
 from fastapi import APIRouter, HTTPException, Response
 from fastapi.responses import FileResponse
@@ -12,9 +13,11 @@ from PIL import Image
 
 from zivid_nova import zivid_app
 from zivid_nova.models.camera import Camera
+from zivid_nova.models.camera_intrinsics import CameraIntrinsics
 from zivid_nova.models.capture_settings_preset import CaptureSettingsPreset
 from zivid_nova.models.downsample_factor import DownsampleFactor
 from zivid_nova.models.pose import Pose
+from zivid_nova.nova_camera_frame import NovaCameraFrame, nova_camera_frame_to_zip
 from zivid_nova.utilities import is_rerun_enabled, rgba_to_rgb
 from zivid_nova.zivid_app import zivid_lock
 
@@ -143,6 +146,50 @@ def get_camera_frame_depth_image(
         image.save(buffer, "png")
         log_2d_image(buffer, "zivid/depth_image")
         return Response(content=buffer.getvalue(), media_type="image/png")
+
+
+@router.get("/{serial_number}/nova-frame", responses={200: {"content": {"application/zip": {}}}})
+@zivid_lock
+def get_camera_nova_frame(
+    serial_number: str,
+    down_sample_factor: DownsampleFactor = DownsampleFactor.NONE,
+    preset: CaptureSettingsPreset = CaptureSettingsPreset.AUTO,
+) -> Response:
+    """
+    Get all per-pixel data of a frame as a zip archive.
+    All passes share the same pixel grid. Lengths are millimetres in the camera frame
+    (+X right, +Y down, +Z viewing direction); invalid pixels hold NaN.
+
+    - color.png: 8-bit sRGB color
+    - depth.exr: distance along +Z, R channel
+    - normal.exr: unit surface normals, R, G and B channels
+    - pointcloud.exr: X, Y and Z of each pixel's point, R, G and B channels
+    - snr.exr: signal-to-noise ratio, R channel
+    - intrinsics.json: OpenCV camera matrix and distortion matching the passes' resolution
+    """
+
+    camera = zivid_app.get_connected_camera(serial_number)
+
+    with zivid_app.get_camera_frame(camera, down_sample_factor, preset) as frame:
+        point_cloud = frame.point_cloud()
+        nova_camera_frame = NovaCameraFrame(
+            color=rgba_to_rgb(point_cloud.copy_data("srgb")),
+            depth=point_cloud.copy_data("z"),
+            normals=point_cloud.copy_data("normals"),
+            points=point_cloud.copy_data("xyz"),
+            snr=point_cloud.copy_data("snr"),
+            # Estimated from the frame, so the intrinsics follow its downsampling
+            intrinsics=CameraIntrinsics.from_zivid_intrinsics(
+                zivid.experimental.calibration.estimate_intrinsics(frame)
+            ),
+        )
+
+    filename = f"{camera.info.serial_number}.zip"
+    return Response(
+        content=nova_camera_frame_to_zip(nova_camera_frame),
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 @router.get("/{serial_number}/frame/board-pose")
