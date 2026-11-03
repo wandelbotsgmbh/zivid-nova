@@ -6,6 +6,9 @@ on:  # yamllint disable-line rule:truthy
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
